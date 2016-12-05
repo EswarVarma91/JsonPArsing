@@ -5,56 +5,60 @@ package com.tonyapps.jsonparsing;
 import android.app.Activity;
 import android.app.Dialog;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.util.Log;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class GoggleNews extends Activity implements SwipeRefreshLayout.OnRefreshListener{
-    private String TAG = GoggleNews.class.getSimpleName();
+public class Bloomberg extends Activity implements SwipeRefreshLayout.OnRefreshListener{
+    private String TAG = Bloomberg.class.getSimpleName();
     private Dialog pDialog;
     private ListView lv;
     private SwipeRefreshLayout swipeRefreshLayout;
     // URL to get contacts JSON
-    private static String url_of_api_key =  "https://newsapi.org/v1/articles?source=google-news&sortBy=top&apiKey=f95ac369aef148e29d6bf0766c8b2715";
-    ArrayList<HashMap<String, String>> GoogleNewsList;
+    private static String url_of_api_key =  "https://newsapi.org/v1/articles?source=bloomberg&sortBy=top&apiKey=f95ac369aef148e29d6bf0766c8b2715";
+    ArrayList<HashMap<String, String>> BloombergList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_goggle_news);
-        GoogleNewsList = new ArrayList<>();
-        lv = (ListView) findViewById(R.id.list2);
-        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh2);
-       // new GoogleNews().execute();
+        setContentView(R.layout.activity_bloomberg);
+        BloombergList = new ArrayList<>();
+        lv = (ListView) findViewById(R.id.list7);
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh7);
+        // new Bloomberg().execute();
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.post(new Runnable() {
                                     @Override
                                     public void run() {
                                         swipeRefreshLayout.setRefreshing(false);
 
-                                        new GoogleNews().execute();
+                                        new Bloomberg1().execute();
                                     }
                                 }
         );
     }
     @Override
     public void onRefresh() {
-        new GoogleNews().execute();
+        new Bloomberg1().execute();
     }
-    private class GoogleNews extends AsyncTask<Void, Void, Void> {
+    private class Bloomberg1 extends AsyncTask<Void, Void, Void> {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
             // Showing progress dialog
-            pDialog = new Dialog(GoggleNews.this);
+            pDialog = new Dialog(com.tonyapps.jsonparsing.Bloomberg.this);
             pDialog.setCancelable(false);
             pDialog.show();
         }
@@ -86,7 +90,7 @@ public class GoggleNews extends Activity implements SwipeRefreshLayout.OnRefresh
                         contact.put("url",url);
                         contact.put("publishedAt",publishedAt);
                         // adding contact to contact list
-                        GoogleNewsList.add(contact);
+                        BloombergList.add(contact);
                     }
                 } catch (final JSONException e) {
                     Log.e(TAG, "Json parsing error: " + e.getMessage());
@@ -121,7 +125,7 @@ public class GoggleNews extends Activity implements SwipeRefreshLayout.OnRefresh
             if (pDialog.isShowing())
                 pDialog.dismiss();
             ListAdapter adapter = new SimpleAdapter(
-                    GoggleNews.this, GoogleNewsList,
+                    com.tonyapps.jsonparsing.Bloomberg.this, BloombergList,
                     R.layout.list_item, new String[]{"author","title", "description","url",
                     "publishedAt"}, new int[]{R.id.author,
                     R.id.title, R.id.description,R.id.url,R.id.publishedAt});
@@ -130,4 +134,5 @@ public class GoggleNews extends Activity implements SwipeRefreshLayout.OnRefresh
         }
     }
 }
+
 

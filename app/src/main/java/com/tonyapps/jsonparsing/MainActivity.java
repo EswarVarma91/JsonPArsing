@@ -1,10 +1,14 @@
 package com.tonyapps.jsonparsing;
-
+/**
+ * Created by Eswar Varma on 03-12-2016.
+ */
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.ListAdapter;
@@ -19,37 +23,52 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity  implements SwipeRefreshLayout.OnRefreshListener{
     private String TAG = MainActivity.class.getSimpleName();
 
-    private ProgressDialog pDialog;
+    private Dialog pDialog;
     private ListView lv;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     // URL to get contacts JSON
     private static String url_of_api_key =  "https://newsapi.org/v1/articles?source=techcrunch&apiKey=f95ac369aef148e29d6bf0766c8b2715";
-    ArrayList<HashMap<String, String>> contactList;
+    ArrayList<HashMap<String, String>> techcrunchlist;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        contactList = new ArrayList<>();
+        techcrunchlist = new ArrayList<>();
 
         lv = (ListView) findViewById(R.id.list1);
 
-        new GetContacts().execute();
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh1);
+        // new GoogleNews().execute();
+        swipeRefreshLayout.setOnRefreshListener(this);
+        swipeRefreshLayout.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        swipeRefreshLayout.setRefreshing(false);
+
+                                        new Techcrunch().execute();
+                                    }
+                                }
+        );
+    }
+    @Override
+    public void onRefresh() {
+        new Techcrunch().execute();
     }
 
     /**
      * Async task class to get json by making HTTP call
      */
-    private class GetContacts extends AsyncTask<Void, Void, Void> {
+    private class Techcrunch extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
             // Showing progress dialog
-            pDialog = new ProgressDialog(MainActivity.this);
-            pDialog.setMessage("Please wait...");
+            pDialog = new Dialog(MainActivity.this);
             pDialog.setCancelable(false);
             pDialog.show();
 
@@ -94,7 +113,7 @@ public class MainActivity extends Activity {
 
 
                         // adding contact to contact list
-                        contactList.add(contact);
+                        techcrunchlist.add(contact);
                     }
                 } catch (final JSONException e) {
                     Log.e(TAG, "Json parsing error: " + e.getMessage());
@@ -115,7 +134,7 @@ public class MainActivity extends Activity {
                     @Override
                     public void run() {
                         Toast.makeText(getApplicationContext(),
-                                "Couldn't get json from server. Check LogCat for possible errors!",
+                                "Check Your Internet Connection",
                                 Toast.LENGTH_LONG)
                                 .show();
                     }
@@ -136,7 +155,7 @@ public class MainActivity extends Activity {
              * Updating parsed JSON data into ListView
              * */
             ListAdapter adapter = new SimpleAdapter(
-                    MainActivity.this, contactList,
+                    MainActivity.this, techcrunchlist,
                     R.layout.list_item, new String[]{"author","title", "description","url",
                     "publishedAt"}, new int[]{R.id.author,
                     R.id.title, R.id.description,R.id.url,R.id.publishedAt});
